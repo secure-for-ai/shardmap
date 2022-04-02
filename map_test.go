@@ -67,14 +67,15 @@ func TestRandomData(t *testing.T) {
 	start := time.Now()
 	for time.Since(start) < time.Second*2 {
 		nums := random(N, true)
-		var m *Map
+		var m *Map[string, interface{}]
 		switch rand.Int() % 5 {
 		default:
-			m = New(N / ((rand.Int() % 3) + 1))
+			m = New[string, interface{}](N / ((rand.Int() % 3) + 1))
 		case 1:
-			m = new(Map)
+			m = new(Map[string, interface{}])
+			m.Init()
 		case 2:
-			m = New(0)
+			m = New[string, interface{}](0)
 		}
 		v, ok := m.Get(k(999))
 		if ok || v != nil {
@@ -183,7 +184,8 @@ func TestRandomData(t *testing.T) {
 }
 
 func TestSetAccept(t *testing.T) {
-	var m Map
+	var m Map[string, interface{}]
+	m.Init()
 	m.Set("hello", "world")
 	prev, replaced := m.SetAccept("hello", "planet", nil)
 	if !replaced {
@@ -247,7 +249,8 @@ func TestSetAccept(t *testing.T) {
 }
 
 func TestDeleteAccept(t *testing.T) {
-	var m Map
+	var m Map[string, interface{}]
+	m.Init()
 	m.Set("hello", "world")
 	prev, deleted := m.DeleteAccept("hello", nil)
 	if !deleted {
@@ -299,7 +302,8 @@ func TestDeleteAccept(t *testing.T) {
 }
 
 func TestClear(t *testing.T) {
-	var m Map
+	var m Map[string, interface{}]
+	m.Init()
 	for i := 0; i < 1000; i++ {
 		m.Set(fmt.Sprintf("%d", i), i)
 	}

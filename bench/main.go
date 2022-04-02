@@ -10,7 +10,7 @@ import (
 
 	cmap "github.com/orcaman/concurrent-map"
 	"github.com/tidwall/lotsa"
-	"github.com/tidwall/shardmap"
+	"github.com/secure-for-ai/shardmap"
 )
 
 func randKey(rnd *rand.Rand, n int) string {
@@ -145,7 +145,7 @@ func main() {
 	println()
 
 	println("-- github.com/tidwall/shardmap --")
-	var com shardmap.Map
+	var com *shardmap.Map[string, interface{}] = shardmap.New[string, interface{}](0)
 	print("set: ")
 	lotsa.Ops(N, runtime.NumCPU(), func(i, _ int) {
 		com.Set(keys[i], i)
