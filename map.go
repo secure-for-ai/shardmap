@@ -8,6 +8,13 @@ import (
 	"github.com/zeebo/xxh3"
 )
 
+type mutex struct {
+	sync.RWMutex
+	// Prevents false sharing on widespread platforms with
+	// 128 mod (cache line size) = 0 .
+	pad [128 - unsafe.Sizeof(sync.RWMutex{})%128]byte
+}
+
 // Map is a hashmap. Like map[string]interface{}, but sharded and thread-safe.
 type Map[K comparable, V any] struct {
 	init       sync.Once
@@ -15,7 +22,7 @@ type Map[K comparable, V any] struct {
 	shards     int
 	shardIDMax uint64
 	seed       uint64
-	mus        []sync.RWMutex
+	mus        []mutex
 	maps       []*mapShard[K, V]
 	kstr       bool
 	ksize      int
@@ -50,9 +57,9 @@ func (m *Map[K, V]) Init() {
 		}
 		m.shardIDMax = uint64(m.shards - 1)
 		scap := m.cap / m.shards
-		m.mus = make([]sync.RWMutex, m.shards)
+		m.mus = make([]mutex, m.shards)
 		m.maps = make([]*mapShard[K, V], m.shards)
-		for i := 0; i < len(m.maps); i++ {
+		for i := 0; i < m.shards; i++ {
 			m.maps[i] = newShard[K, V](scap)
 		}
 	})
