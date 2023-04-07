@@ -15,8 +15,8 @@ const (
 
 type entry[K comparable, V any] struct {
 	hdib  uint64 // bitfield { hash:48 dib:16 }
-	value V      // user value
 	key   K      // user key
+	value V      // user value
 }
 
 func (e *entry[K, V]) dib() uint64 {
@@ -67,9 +67,9 @@ func makeHash(hash uint64) uint64 {
 type mapShard[K comparable, V any] struct {
 	cap      int
 	length   int
-	mask     uint64
 	growAt   int
 	shrinkAt int
+	mask     uint64
 	buckets  []entry[K, V]
 }
 
@@ -113,7 +113,7 @@ func (m *mapShard[K, V]) SetWithHash(hash uint64, key K, value V) (V, bool) {
 }
 
 func (m *mapShard[K, V]) set(hash uint64, key K, value V) (prev V, ok bool) {
-	e := entry[K, V]{makeHDIB(hash, 1), value, key}
+	e := entry[K, V]{hdib: makeHDIB(hash, 1), value: value, key: key}
 	i := e.hash() & m.mask
 	for {
 		if m.buckets[i].dib() == 0 {
