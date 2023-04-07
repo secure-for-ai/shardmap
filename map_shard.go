@@ -10,6 +10,7 @@ const (
 	hashBitSize = 64 - dibBitSize           // 0xFFFFFFFFFFFF
 	maxHash     = ^uint64(0) >> dibBitSize  // max 28,147,497,671,0655
 	maxDIB      = ^uint64(0) >> hashBitSize // max 65,535
+	hashMask    = ^maxDIB                   // 0xFFFF FFFF FFFF 0000
 )
 
 type entry[K comparable, V any] struct {
@@ -25,10 +26,10 @@ func (e *entry[K, V]) hash() uint64 {
 	return e.hdib >> dibBitSize
 }
 func (e *entry[K, V]) setDIB(dib uint64) {
-	e.hdib = e.hdib>>dibBitSize<<dibBitSize | dib&maxDIB
+	e.hdib = e.hdib&hashMask | dib&maxDIB
 }
 func (e *entry[K, V]) setHash(hash uint64) {
-	e.hdib = uint64(hash)<<dibBitSize | e.hdib&maxDIB
+	e.hdib = hash<<dibBitSize | e.hdib&maxDIB
 }
 func makeHDIB(hash, dib uint64) uint64 {
 	return hash<<dibBitSize | dib&maxDIB
